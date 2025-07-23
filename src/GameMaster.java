@@ -12,8 +12,12 @@ import weapon.Sword;
 import weapon.Wand;
 import weapon.Weapon;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.math.*;
+import java.util.Iterator;
+
 public class GameMaster {
     public static void main(String[] args) {
 
@@ -43,26 +47,21 @@ public class GameMaster {
             int choice = (int)(Math.random() * 3);
             switch (choice) {
                 case 0:
-                    enemy.add(matango);
-                    enemy.get(i).setSuffix((char)('A' + matangoC));
+                    enemy.add(new Matango((char)('A' + matangoC),45));
                     matangoC++;
                     break;
                 case 1:
-                    enemy.add(goblin);
-                    enemy.get(i).setSuffix((char)('A' + goblinC));
+                    enemy.add(new Goblin((char)('A' + goblinC),50));
                     goblinC++;
                     break;
                 case 2:
-                    enemy.add(slime);
-                    enemy.get(i).setSuffix((char)('A' + slimecC));
+                    enemy.add(new Slime((char)('A' + slimecC),40));
                     slimecC++;
                     break;
-            }
-
+            }//敵集団生成完了
         }
-        enemy.add(matango);
-        enemy.add(goblin);
-        enemy.add(slime);
+
+
 
         //エンティティの状態表示
         System.out.println("---味方パーティ---");
@@ -74,6 +73,56 @@ public class GameMaster {
             member.showStatus();
         }
         //ここから戦闘開始
+
+        //ここにIteratorを用いた拡張for文がいる
+        Iterator<Character> aliveParty = party.iterator();
+        Iterator<Monster> aliveEnemy = enemy.iterator();
+
+        System.out.println("味方のターン");
+        int count = 0;
+        while (aliveParty.hasNext()) {
+            System.out.print(++count + "人目:");
+            Character point = aliveParty.next();
+            if (point instanceof Hero ) {
+                System.out.println("勇者の行動！");
+                System.out.println("1.攻撃");
+                System.out.println("2.SuperHeroになる");
+                int action = IntReader();
+                switch (action) {
+                    case 1:
+                        int cnt = 0;
+                        System.out.println("対象を選択");
+                        for(Monster select : enemy) {
+                            System.out.println(cnt + ":" + select.getName() + select.getSuffix());
+                            cnt++;
+                        }
+                        int select = IntReader();
+                        point.attack(enemy.get(select));
+                        if (damageShock(enemy.get(select))) {
+                            enemy.remove(select);
+                        }
+                        break;
+                    case 2:
+                        System.out.println(point.getName() + "はスーパーヒーローに進化した！");
+                        System.out.println(point.getName() + "は力を開放する代償として30のダメージを受けた！");
+                        if (point.getHp() <= 30) {
+                            point.die();
+                        }else {
+                            SuperHero sHero = new SuperHero(hero);
+                            party.set(0, sHero); //ここでジョブチェン
+                        }
+                }
+            }
+
+
+
+        }
+
+
+
+
+
+
         System.out.println("\n味方の総攻撃！");
         for (creature.Character tripleAtk: party) { //殴るクリーチャーを変更
             for (int i = 0; i < 3; i++) { //殴られるクリーチャーを変更
@@ -114,4 +163,28 @@ public class GameMaster {
             }
         }
     }
+
+    public static int IntReader() {
+        int choice = 0;
+
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
+            choice = Integer.parseInt(br.readLine());
+        } catch (NumberFormatException | NullPointerException | IOException e) {
+            System.out.println("エラー" + e.getMessage());
+        }
+        return choice;
+    }
+
+    public static boolean damageShock(Monster monster) {
+        if (monster.getHp() <= 0) {
+            monster.die();
+            return true;
+        }else if(monster.getHp() <= 5) {
+            monster.run();
+            return true;
+        }
+        return false;
+    }
+
+
 }
