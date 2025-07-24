@@ -9,6 +9,7 @@ public class Wizard extends Character {
 
     public Wizard(String name, int hp, Weapon weapon, int mp) {
         super(name, hp, weapon);
+        setMp(mp);
     }
 
     public void magic(Creature target) {

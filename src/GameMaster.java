@@ -72,92 +72,105 @@ public class GameMaster {
         for (Monster member: enemy) {
             member.showStatus();
         }
-        //ここから戦闘開始
 
         //ここにIteratorを用いた拡張for文がいる
         Iterator<Character> aliveParty = party.iterator();
         Iterator<Monster> aliveEnemy = enemy.iterator();
 
-        System.out.println("味方のターン");
-        int count = 0;
-        while (aliveParty.hasNext()) { //自傷で死ぬ可能性あり
-            System.out.print(++count + "人目:");
-            Character point = aliveParty.next();
-            if (point instanceof Hero ) {
-                System.out.println("勇者の行動！");
-                System.out.println("1.攻撃");
-                System.out.println("2.SuperHeroになる");
-                int action = IntReader();
-                switch (action) {
-                    case 1:
-                        int cnt = 1; //cnt補正付与
-                        System.out.println("対象を選択");
-                        for(Monster select : enemy) {
-                            System.out.println(cnt + ":" + select.getName() + select.getSuffix());
-                            cnt++;
-                        }
-                        int select = IntReader() - 1;//cnt補正の削除
-                        point.attack(enemy.get(select));
-                        if (damageShock(enemy.get(select))) {
-                            enemy.remove(select);
-                        }
-                        break;
-                    case 2:
-                        System.out.println(point.getName() + "はスーパーヒーローに進化した！");
-                        System.out.println(point.getName() + "は力を開放する代償として30のダメージを受けた！");
-                        if (point.getHp() <= 30) {
-                            point.die();
-                        }else {
-                            SuperHero sHero = new SuperHero(hero);
-                            party.set(0, sHero); //ここでジョブチェン
-                        }
-                }
-            }else if(point instanceof Wizard) {
-                System.out.println("魔法使いの行動！");
-                System.out.println("1.攻撃");
-                System.out.println("2.魔法攻撃");
-                int action = IntReader();
-                int cnt;
+        //ここから戦闘開始
+        while (!party.isEmpty() || !enemy.isEmpty()){
 
-                switch (action) {
-                    case 1:
-                        cnt = 1; //cnt補正付与
-                        System.out.println("対象を選択");
-                        for(Monster select : enemy) {
-                            System.out.println(cnt + ":" + select.getName() + select.getSuffix());
-                            cnt++;
-                        }
-                        int select = IntReader() - 1;//cnt補正の削除
-                        point.attack(enemy.get(select));
-                        if (damageShock(enemy.get(select))) {
-                            enemy.remove(select);
-                        }
-                        break;
-                    case 2:
-                        cnt = 1; //cnt補正付与
-                        System.out.println("対象を選択");
-                        for(Monster select : enemy) {
-                            System.out.println(cnt + ":" + select.getName() + select.getSuffix());
-                            cnt++;
-                        }
-                        int select = IntReader() - 1;//cnt補正の削除
-                        point.attack(enemy.get(select));
-                        if (damageShock(enemy.get(select))) {
-                            enemy.remove(select);
-                        }
+            System.out.println("味方のターン");
+            int count = 0;
+            while (aliveParty.hasNext()) { //要警戒-->自傷による死亡
+                System.out.print(++count + "人目:");
+                Character actChar = aliveParty.next();
+                if (actChar instanceof SuperHero) {
+                    int choiceResult = -1;
+                    choiceResult = choiceEmy(enemy);
+                    //int select = IntReader() - 1;//cnt補正の削除
+                    actChar.attack(enemy.get(choiceResult));
+                    if (damageShock(enemy.get(choiceResult))) {
+                        enemy.remove(choiceResult);
+                    }
+                } else if (actChar instanceof Hero) {
+                    System.out.println("勇者の行動！");
+                    System.out.println("1.攻撃");
+                    System.out.println("2.SuperHeroになる");
+                    int action = IntReader();
+                    int choiceResult = -1;
+                    switch (action) {
+                        case 1:
+                            choiceResult = choiceEmy(enemy);
+                            //int select = IntReader() - 1;//cnt補正の削除
+                            actChar.attack(enemy.get(choiceResult));
+                            if (damageShock(enemy.get(choiceResult))) {
+                                enemy.remove(choiceResult);
+                            }
+                            break;
+                        case 2:
+                            System.out.println(actChar.getName() + "はスーパーヒーローに進化した！");
+                            System.out.println(actChar.getName() + "は力を開放する代償として30のダメージを受けた！");
+                            if (actChar.getHp() <= 30) {
+                                actChar.die();
+                            } else {
+                                SuperHero sHero = new SuperHero(hero);
+                                party.set(0, sHero); //ここでジョブチェン
+                            }
+                            break;
+                    }
+                } else if (actChar instanceof Wizard) {
+                    System.out.println("魔法使いの行動！");
+                    System.out.println("1.攻撃");
+                    System.out.println("2.魔法攻撃");
+                    int action = IntReader();
+                    int choiceResult = -1;
 
+                    switch (action) {
+                        case 1:
+                            choiceResult = choiceEmy(enemy);
+                            actChar.attack(enemy.get(choiceResult));
+                            if (damageShock(enemy.get(choiceResult))) {
+                                enemy.remove(choiceResult);
+                            }
+                            break;
+                        case 2:
+                            choiceResult = choiceEmy(enemy);
+                            ((Wizard) actChar).magic(enemy.get(choiceResult)); //actCharをWizard型としてキャスト
+                            if (damageShock(enemy.get(choiceResult))) {
+                                enemy.remove(choiceResult);
+                            }
+                            break;
+                    }
+                } else if (actChar instanceof Thief) {
+                    System.out.println("盗賊の行動！");
+                    System.out.println("1.攻撃");
+                    System.out.println("2.守り");
+                    int action = IntReader();
+                    int choiceResult = -1;
+                    switch (action) {
+                        case 1:
+                            choiceResult = choiceEmy(enemy); //対象の選択
+                            actChar.attack(enemy.get(choiceResult));
+                            if (damageShock(enemy.get(choiceResult))) {
+                                enemy.remove(choiceResult);
+                            }
+                            break;
+                        case 2:
+                            ((Thief) actChar).guard();
+                    }
                 }
             }
 
 
 
-        }
+        }//戦闘ループの終着点
 
 
 
 
 
-
+        /*
         System.out.println("\n味方の総攻撃！");
         for (creature.Character tripleAtk: party) { //殴るクリーチャーを変更
             for (int i = 0; i < 3; i++) { //殴られるクリーチャーを変更
@@ -176,7 +189,7 @@ public class GameMaster {
         party.set(0, sHero); //ここでジョブチェン
         for (int i = 0; i < 3; i++) {
             sHero.attack(enemy.get(i));
-        }
+        }*/
 
         System.out.println("\n味方パーティ最終ステータス");
         for (Character member : party) {
@@ -199,7 +212,7 @@ public class GameMaster {
         }
     }
 
-    public static int IntReader() {
+    private static int IntReader() {
         int choice = 0;
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         try {
@@ -210,7 +223,7 @@ public class GameMaster {
         return choice;
     }
 
-    public static boolean damageShock(Monster monster) {
+    private static boolean damageShock(Monster monster) {//敵の削除は行わないよ
         if (monster.getHp() <= 0) {
             monster.die();
             return true;
@@ -219,6 +232,17 @@ public class GameMaster {
             return true;
         }
         return false;
+    }
+
+    public static int choiceEmy(ArrayList<Monster> enemy) {
+        int cnt = 1; //cnt補正付与
+        System.out.println("対象を選択");
+        for(Monster select : enemy) {
+            System.out.println(cnt + ":" + select.getName() + select.getSuffix());
+            cnt++;
+        }
+        return IntReader() - 1;//cnt補正の削除
+
     }
 
 

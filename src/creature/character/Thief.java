@@ -20,13 +20,24 @@ public class Thief extends Character {
         target.setHp(target.getHp() - damage);
     }
 
+    public void guard() {
+        System.out.println(this.getName() + "は身を守っている！");
+        setGuard(true);
+    }
+
     public void setHp(int hp) {
-        if (guard) {
+        if (getGuard()) {
             System.out.println("しかし、" + getName() + "は攻撃を回避し、ダメージが入らなかった！");
-            guard = false;
+            setGuard(false);
         }else {
             super.setHp(hp);
         }
+    }
+    private void setGuard(boolean isGuard) {
+        this.guard = isGuard;
+    }
+    private boolean getGuard() {
+        return guard;
     }
 
 }
