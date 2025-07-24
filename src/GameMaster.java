@@ -161,8 +161,10 @@ public class GameMaster {
                     }
                 }
             }
-
-
+            System.out.println("敵のターン");
+            for(Monster actEm: enemy) {
+                int partC = party.size(); //ここいい感じに乱数にする
+            }
 
         }//戦闘ループの終着点
 
