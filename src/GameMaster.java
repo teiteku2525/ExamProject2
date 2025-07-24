@@ -80,7 +80,7 @@ public class GameMaster {
 
         System.out.println("味方のターン");
         int count = 0;
-        while (aliveParty.hasNext()) {
+        while (aliveParty.hasNext()) { //自傷で死ぬ可能性あり
             System.out.print(++count + "人目:");
             Character point = aliveParty.next();
             if (point instanceof Hero ) {
@@ -90,13 +90,13 @@ public class GameMaster {
                 int action = IntReader();
                 switch (action) {
                     case 1:
-                        int cnt = 0;
+                        int cnt = 1; //cnt補正付与
                         System.out.println("対象を選択");
                         for(Monster select : enemy) {
                             System.out.println(cnt + ":" + select.getName() + select.getSuffix());
                             cnt++;
                         }
-                        int select = IntReader();
+                        int select = IntReader() - 1;//cnt補正の削除
                         point.attack(enemy.get(select));
                         if (damageShock(enemy.get(select))) {
                             enemy.remove(select);
@@ -111,6 +111,41 @@ public class GameMaster {
                             SuperHero sHero = new SuperHero(hero);
                             party.set(0, sHero); //ここでジョブチェン
                         }
+                }
+            }else if(point instanceof Wizard) {
+                System.out.println("魔法使いの行動！");
+                System.out.println("1.攻撃");
+                System.out.println("2.魔法攻撃");
+                int action = IntReader();
+                int cnt;
+
+                switch (action) {
+                    case 1:
+                        cnt = 1; //cnt補正付与
+                        System.out.println("対象を選択");
+                        for(Monster select : enemy) {
+                            System.out.println(cnt + ":" + select.getName() + select.getSuffix());
+                            cnt++;
+                        }
+                        int select = IntReader() - 1;//cnt補正の削除
+                        point.attack(enemy.get(select));
+                        if (damageShock(enemy.get(select))) {
+                            enemy.remove(select);
+                        }
+                        break;
+                    case 2:
+                        cnt = 1; //cnt補正付与
+                        System.out.println("対象を選択");
+                        for(Monster select : enemy) {
+                            System.out.println(cnt + ":" + select.getName() + select.getSuffix());
+                            cnt++;
+                        }
+                        int select = IntReader() - 1;//cnt補正の削除
+                        point.attack(enemy.get(select));
+                        if (damageShock(enemy.get(select))) {
+                            enemy.remove(select);
+                        }
+
                 }
             }
 
@@ -166,8 +201,8 @@ public class GameMaster {
 
     public static int IntReader() {
         int choice = 0;
-
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        try {
             choice = Integer.parseInt(br.readLine());
         } catch (NumberFormatException | NullPointerException | IOException e) {
             System.out.println("エラー" + e.getMessage());
