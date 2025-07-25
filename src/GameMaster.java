@@ -26,7 +26,7 @@ public class GameMaster {
         Weapon wand = new Wand();
         Weapon dagger = new Dagger();
 
-        Hero hero = new Hero("勇者", 100, sword);
+        Hero hero = new Hero("勇者", 30, sword);
         Wizard wizard = new Wizard("魔法使い", 60, wand,40);
         Thief thief = new Thief("盗賊", 70, dagger);
         ArrayList<creature.Character> party = new ArrayList<creature.Character>();
@@ -112,6 +112,7 @@ public class GameMaster {
                             System.out.println(actChar.getName() + "は力を開放する代償として30のダメージを受けた！");
                             if (actChar.getHp() <= 30) {
                                 actChar.die();
+                                aliveParty.remove();
                             } else {
                                 SuperHero sHero = new SuperHero(hero);
                                 party.set(0, sHero); //ここでジョブチェン
