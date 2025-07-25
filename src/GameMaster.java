@@ -26,7 +26,7 @@ public class GameMaster {
         Weapon wand = new Wand();
         Weapon dagger = new Dagger();
 
-        Hero hero = new Hero("勇者", 30, sword);
+        Hero hero = new Hero("勇者", 100, sword);
         Wizard wizard = new Wizard("魔法使い", 60, wand,40);
         Thief thief = new Thief("盗賊", 70, dagger);
         ArrayList<creature.Character> party = new ArrayList<creature.Character>();
