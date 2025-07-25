@@ -73,19 +73,18 @@ public class GameMaster {
             member.showStatus();
         }
 
-        //ここにIteratorを用いた拡張for文がいる
-        Iterator<Character> aliveParty = party.iterator();
-        Iterator<Monster> aliveEnemy = enemy.iterator();
 
         //ここから戦闘開始
-        while (!party.isEmpty() || !enemy.isEmpty()){
+        while (!isWipeout(enemy,party)){
 
             System.out.println("味方のターン");
             int count = 0;
-            while (aliveParty.hasNext()) { //要警戒-->自傷による死亡
+            Iterator<Character> aliveParty = party.iterator();
+            while (aliveParty.hasNext() && !isWipeout(enemy,party)) { //要警戒-->自傷による死亡
                 System.out.print(++count + "人目:");
                 Character actChar = aliveParty.next();
                 if (actChar instanceof SuperHero) {
+                    System.out.println("勇者の行動");
                     int choiceResult = -1;
                     choiceResult = choiceEmy(enemy);
                     //int select = IntReader() - 1;//cnt補正の削除
@@ -161,13 +160,30 @@ public class GameMaster {
                     }
                 }
             }
+            if (isWipeout(enemy,party)) {
+                break;
+            }
             System.out.println("敵のターン");
             for(Monster actEm: enemy) {
-                int partC = party.size(); //ここいい感じに乱数にする
+                int hitChar = (int)(Math.random() * party.size());
+                actEm.attack(party.get(hitChar));
+                if (damageShock(party.get(hitChar))) {
+                    party.remove(hitChar);
+                }
+                if (isWipeout(enemy,party)) {
+                    break;
+                }
             }
 
         }//戦闘ループの終着点
 
+        if (party.isEmpty()) {
+            System.out.println("味方パーティは全滅してしまった…");
+        }else if(enemy.isEmpty()) {
+            System.out.println("敵を全て倒した！" + hero.getName() + "達は勝利した！");
+        }else {
+            System.out.println("何もいなくなった… \n これは起こりえない事象です。");
+        }
 
 
 
@@ -191,7 +207,7 @@ public class GameMaster {
         party.set(0, sHero); //ここでジョブチェン
         for (int i = 0; i < 3; i++) {
             sHero.attack(enemy.get(i));
-        }*/
+        }
 
         System.out.println("\n味方パーティ最終ステータス");
         for (Character member : party) {
@@ -211,10 +227,10 @@ public class GameMaster {
             } else {
                 System.out.println("生存状況:討伐済み");
             }
-        }
+        }*/
     }
 
-    private static int IntReader() {
+    private static int IntReader() {//brを引数で渡したりthrowでメインでトライキャッチすれば元の方法でもいけるかも？
         int choice = 0;
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         try {
@@ -234,6 +250,17 @@ public class GameMaster {
             return true;
         }
         return false;
+    }
+    private static boolean damageShock(Character character) {
+        if (character.getHp() <= 0) {
+            character.die();
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean isWipeout(ArrayList<Monster> enemy, ArrayList<Character> party) {
+        return (party.isEmpty() || enemy.isEmpty());
     }
 
     public static int choiceEmy(ArrayList<Monster> enemy) {
